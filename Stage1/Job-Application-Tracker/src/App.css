@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  color: #222;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.app {
+  width: min(900px, 92%);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.app-header {
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  margin-bottom: 8px;
+}
+
+.application-form,
+.application-list {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.form-field {
+  margin-bottom: 18px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.error-message {
+  margin: 5px 0 0;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-button,
+.delete-button {
+  background: #ddd;
+}
+
+.application-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.application-item:last-child {
+  border-bottom: none;
+}
+
+.application-item h3 {
+  margin: 0 0 6px;
+}
+
+.application-item p {
+  margin: 5px 0;
+}
+
+.application-item a {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .application-item {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
