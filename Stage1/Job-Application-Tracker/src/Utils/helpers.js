@@ -6,10 +6,41 @@ export const ROUNDS = [
   'Rejected'
 ];
 
+/**
+ * Returns today's date formatted as YYYY-MM-DD in local time.
+ */
 export const getTodayString = () => {
-  return new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
+/**
+ * Calculates days elapsed between an applied date string and today.
+ */
+export const calculateDaysSinceApplied = (appliedDateString) => {
+  if (!appliedDateString) return 0;
+  const applied = new Date(`${appliedDateString}T00:00:00`);
+  const today = new Date(`${getTodayString()}T00:00:00`);
+  const diffTime = today - applied;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
+/**
+ * Determines whether an application is considered stale (>14 days and in Applied/Screen).
+ */
+export const isApplicationStale = (application) => {
+  const days = calculateDaysSinceApplied(application.appliedDate);
+  const eligibleRounds = ['Applied', 'Screen'];
+  return days > 14 && eligibleRounds.includes(application.round);
+};
+
+/**
+ * Validates URLs starting with http:// or https:// with valid hosts.
+ */
 export const isValidUrl = (value) => {
   try {
     const url = new URL(value);
@@ -19,14 +50,17 @@ export const isValidUrl = (value) => {
   }
 };
 
+/**
+ * Controlled field validation rules for create and edit.
+ */
 export const validateApplication = (formData) => {
   const errors = {};
 
-  if (!formData.company.trim()) {
+  if (!formData.company || !formData.company.trim()) {
     errors.company = 'Company is required.';
   }
 
-  if (!formData.role.trim()) {
+  if (!formData.role || !formData.role.trim()) {
     errors.role = 'Role is required.';
   }
 
@@ -36,9 +70,10 @@ export const validateApplication = (formData) => {
     errors.appliedDate = 'Applied date cannot be in the future.';
   }
 
-  if (!formData.jobLink.trim()) {
+  const trimmedLink = formData.jobLink ? formData.jobLink.trim() : '';
+  if (!trimmedLink) {
     errors.jobLink = 'Job link is required.';
-  } else if (!isValidUrl(formData.jobLink.trim())) {
+  } else if (!isValidUrl(trimmedLink)) {
     errors.jobLink = 'Enter a valid URL starting with http:// or https://.';
   }
 
