@@ -42,7 +42,7 @@ function App() {
     if (editingId === id) setEditingId(null);
   };
 
-
+  // Filter and sort: newest appliedDate first. Tiebreak by array index/id.
   const filteredAndSortedApplications = useMemo(() => {
     return [...applications]
       .sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate))

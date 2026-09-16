@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ROUNDS, getTodayString, validateApplication } from '../Utils/helpers';
+import { ROUNDS, getTodayString, validateApplication, validateField } from '../Utils/helpers';
 
 const INITIAL_FORM = {
   company: '',
@@ -16,8 +16,11 @@ function ApplicationForm({ onAddApplication }) {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Real-time inline field validation / clearing
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      const fieldError = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: fieldError }));
     }
   };
 
@@ -55,7 +58,12 @@ function ApplicationForm({ onAddApplication }) {
   };
 
   return (
-    <form className="application-form" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+    <form 
+      className="application-form card" 
+      onSubmit={handleSubmit} 
+      onKeyDown={handleKeyDown}
+      noValidate
+    >
       <h2>Add Application</h2>
 
       <div className="form-row">
@@ -64,9 +72,11 @@ function ApplicationForm({ onAddApplication }) {
           <input
             id="company"
             name="company"
+            type="text"
             value={formData.company}
             onChange={handleChange}
-            placeholder="e.g. Google"
+            placeholder="e.g. Stripe"
+            className={errors.company ? 'input-error' : ''}
           />
           {errors.company && <p className="error-message">{errors.company}</p>}
         </div>
@@ -76,9 +86,11 @@ function ApplicationForm({ onAddApplication }) {
           <input
             id="role"
             name="role"
+            type="text"
             value={formData.role}
             onChange={handleChange}
             placeholder="e.g. Frontend Engineer"
+            className={errors.role ? 'input-error' : ''}
           />
           {errors.role && <p className="error-message">{errors.role}</p>}
         </div>
@@ -105,6 +117,7 @@ function ApplicationForm({ onAddApplication }) {
             max={getTodayString()}
             value={formData.appliedDate}
             onChange={handleChange}
+            className={errors.appliedDate ? 'input-error' : ''}
           />
           {errors.appliedDate && <p className="error-message">{errors.appliedDate}</p>}
         </div>
@@ -115,10 +128,11 @@ function ApplicationForm({ onAddApplication }) {
         <input
           id="jobLink"
           name="jobLink"
-          type="url"
+          type="text" /* Changed from type="url" to prevent browser native tooltip intercepts */
           value={formData.jobLink}
           onChange={handleChange}
-          placeholder="https://example.com/job"
+          placeholder="https://company.com/careers/job-id"
+          className={errors.jobLink ? 'input-error' : ''}
         />
         {errors.jobLink && <p className="error-message">{errors.jobLink}</p>}
       </div>
@@ -128,7 +142,7 @@ function ApplicationForm({ onAddApplication }) {
           Add Application
         </button>
         <button type="button" className="cancel-button" onClick={handleReset}>
-          Cancel (Esc)
+          Cancel
         </button>
       </div>
     </form>

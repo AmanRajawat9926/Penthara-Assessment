@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ROUNDS, getTodayString, validateApplication } from '../Utils/helpers';
+import { ROUNDS, getTodayString, validateApplication, validateField } from '../Utils/helpers';
 
 function EditApplicationRow({ application, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -15,8 +15,10 @@ function EditApplicationRow({ application, onSave, onCancel }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      const fieldError = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: fieldError }));
     }
   };
 
@@ -46,25 +48,34 @@ function EditApplicationRow({ application, onSave, onCancel }) {
   };
 
   return (
-    <form className="application-item editing" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+    <form 
+      className="application-item editing" 
+      onSubmit={handleSubmit} 
+      onKeyDown={handleKeyDown} 
+      noValidate
+    >
       <div className="edit-grid">
         <div className="form-field">
-          <label>Company</label>
+          <label>Company *</label>
           <input
             name="company"
+            type="text"
             value={formData.company}
             onChange={handleChange}
             autoFocus
+            className={errors.company ? 'input-error' : ''}
           />
           {errors.company && <p className="error-message">{errors.company}</p>}
         </div>
 
         <div className="form-field">
-          <label>Role</label>
+          <label>Role *</label>
           <input
             name="role"
+            type="text"
             value={formData.role}
             onChange={handleChange}
+            className={errors.role ? 'input-error' : ''}
           />
           {errors.role && <p className="error-message">{errors.role}</p>}
         </div>
@@ -79,24 +90,26 @@ function EditApplicationRow({ application, onSave, onCancel }) {
         </div>
 
         <div className="form-field">
-          <label>Applied Date</label>
+          <label>Applied Date *</label>
           <input
             type="date"
             name="appliedDate"
             max={getTodayString()}
             value={formData.appliedDate}
             onChange={handleChange}
+            className={errors.appliedDate ? 'input-error' : ''}
           />
           {errors.appliedDate && <p className="error-message">{errors.appliedDate}</p>}
         </div>
 
         <div className="form-field full-width">
-          <label>Job Link</label>
+          <label>Job Link *</label>
           <input
-            type="url"
+            type="text"
             name="jobLink"
             value={formData.jobLink}
             onChange={handleChange}
+            className={errors.jobLink ? 'input-error' : ''}
           />
           {errors.jobLink && <p className="error-message">{errors.jobLink}</p>}
         </div>
