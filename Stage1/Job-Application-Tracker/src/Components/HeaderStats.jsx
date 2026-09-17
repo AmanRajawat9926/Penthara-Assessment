@@ -13,7 +13,7 @@ function HeaderStats({ applications }) {
   });
 
   return (
-    <section className="header-stats" aria-label="Application Round Breakdown">
+    <section className="header-stats" aria-label="Pipeline overview">
       <div className="stat-card total">
         <span className="stat-label">Total</span>
         <span className="stat-count">{applications.length}</span>

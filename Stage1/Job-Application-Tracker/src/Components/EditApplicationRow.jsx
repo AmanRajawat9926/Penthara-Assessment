@@ -16,10 +16,9 @@ function EditApplicationRow({ application, onSave, onCancel }) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (errors[name]) {
-      const fieldError = validateField(name, value);
-      setErrors((prev) => ({ ...prev, [name]: fieldError }));
-    }
+    // Instant validation update
+    const fieldError = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
 
   const handleSubmit = (e) => {
@@ -48,14 +47,15 @@ function EditApplicationRow({ application, onSave, onCancel }) {
   };
 
   return (
-    <form 
-      className="application-item editing" 
-      onSubmit={handleSubmit} 
-      onKeyDown={handleKeyDown} 
+    <form
+      className="application-item editing-card"
+      onSubmit={handleSubmit}
+      onKeyDown={handleKeyDown}
       noValidate
+      aria-label={`Editing application for ${application.company}`}
     >
       <div className="edit-grid">
-        <div className="form-field">
+        <div className={`form-field ${errors.company ? 'has-error' : ''}`}>
           <label>Company *</label>
           <input
             name="company"
@@ -68,7 +68,7 @@ function EditApplicationRow({ application, onSave, onCancel }) {
           {errors.company && <p className="error-message">{errors.company}</p>}
         </div>
 
-        <div className="form-field">
+        <div className={`form-field ${errors.role ? 'has-error' : ''}`}>
           <label>Role *</label>
           <input
             name="role"
@@ -84,12 +84,14 @@ function EditApplicationRow({ application, onSave, onCancel }) {
           <label>Round</label>
           <select name="round" value={formData.round} onChange={handleChange}>
             {ROUNDS.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
         </div>
 
-        <div className="form-field">
+        <div className={`form-field ${errors.appliedDate ? 'has-error' : ''}`}>
           <label>Applied Date *</label>
           <input
             type="date"
@@ -102,7 +104,7 @@ function EditApplicationRow({ application, onSave, onCancel }) {
           {errors.appliedDate && <p className="error-message">{errors.appliedDate}</p>}
         </div>
 
-        <div className="form-field full-width">
+        <div className={`form-field full-width ${errors.jobLink ? 'has-error' : ''}`}>
           <label>Job Link *</label>
           <input
             type="text"
@@ -115,12 +117,12 @@ function EditApplicationRow({ application, onSave, onCancel }) {
         </div>
       </div>
 
-      <div className="item-actions">
+      <div className="item-actions editing-actions">
         <button type="submit" className="save-button">
-          Save 
+          Save Changes
         </button>
         <button type="button" className="cancel-button" onClick={onCancel}>
-          Cancel 
+          Cancel (Esc)
         </button>
       </div>
     </form>

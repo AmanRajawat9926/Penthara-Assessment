@@ -12,25 +12,42 @@ const INITIAL_FORM = {
 function ApplicationForm({ onAddApplication }) {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Real-time inline field validation / clearing
-    if (errors[name]) {
-      const fieldError = validateField(name, value);
-      setErrors((prev) => ({ ...prev, [name]: fieldError }));
+    // Instant validation if user has touched field or already has error
+    if (touched[name] || errors[name]) {
+      const errorMsg = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: errorMsg }));
     }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const errorMsg = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
 
   const handleReset = () => {
     setFormData({ ...INITIAL_FORM, appliedDate: getTodayString() });
     setErrors({});
+    setTouched({});
   };
 
-  const handleSubmit = (event) => {
-    if (event) event.preventDefault();
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+
+    // Mark all as touched to trigger full visual state
+    setTouched({
+      company: true,
+      role: true,
+      appliedDate: true,
+      jobLink: true
+    });
 
     const validationErrors = validateApplication(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -44,30 +61,35 @@ function ApplicationForm({ onAddApplication }) {
       role: formData.role.trim(),
       round: formData.round,
       appliedDate: formData.appliedDate,
-      jobLink: formData.jobLink.trim()
+      jobLink: formData.jobLink.trim(),
+      createdAt: Date.now()
     });
 
     handleReset();
   };
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
       handleReset();
     }
   };
 
   return (
-    <form 
-      className="application-form card" 
-      onSubmit={handleSubmit} 
+    <form
+      className="application-form card"
+      onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
       noValidate
+      aria-label="Add new application"
     >
-      <h2>Add Application</h2>
+      <div className="form-header">
+        <h2>Add Application</h2>
+        <span className="shortcut-hint">Tip: [Enter] adds, [Esc] clears</span>
+      </div>
 
       <div className="form-row">
-        <div className="form-field">
+        <div className={`form-field ${errors.company ? 'has-error' : ''}`}>
           <label htmlFor="company">Company *</label>
           <input
             id="company"
@@ -75,13 +97,20 @@ function ApplicationForm({ onAddApplication }) {
             type="text"
             value={formData.company}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="e.g. Stripe"
             className={errors.company ? 'input-error' : ''}
+            aria-invalid={Boolean(errors.company)}
+            aria-describedby={errors.company ? 'company-error' : undefined}
           />
-          {errors.company && <p className="error-message">{errors.company}</p>}
+          {errors.company && (
+            <p id="company-error" className="error-message" role="alert">
+              {errors.company}
+            </p>
+          )}
         </div>
 
-        <div className="form-field">
+        <div className={`form-field ${errors.role ? 'has-error' : ''}`}>
           <label htmlFor="role">Role *</label>
           <input
             id="role"
@@ -89,17 +118,29 @@ function ApplicationForm({ onAddApplication }) {
             type="text"
             value={formData.role}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="e.g. Frontend Engineer"
             className={errors.role ? 'input-error' : ''}
+            aria-invalid={Boolean(errors.role)}
+            aria-describedby={errors.role ? 'role-error' : undefined}
           />
-          {errors.role && <p className="error-message">{errors.role}</p>}
+          {errors.role && (
+            <p id="role-error" className="error-message" role="alert">
+              {errors.role}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="form-row">
         <div className="form-field">
           <label htmlFor="round">Round</label>
-          <select id="round" name="round" value={formData.round} onChange={handleChange}>
+          <select
+            id="round"
+            name="round"
+            value={formData.round}
+            onChange={handleChange}
+          >
             {ROUNDS.map((round) => (
               <option key={round} value={round}>
                 {round}
@@ -108,7 +149,7 @@ function ApplicationForm({ onAddApplication }) {
           </select>
         </div>
 
-        <div className="form-field">
+        <div className={`form-field ${errors.appliedDate ? 'has-error' : ''}`}>
           <label htmlFor="appliedDate">Applied Date *</label>
           <input
             id="appliedDate"
@@ -117,24 +158,38 @@ function ApplicationForm({ onAddApplication }) {
             max={getTodayString()}
             value={formData.appliedDate}
             onChange={handleChange}
+            onBlur={handleBlur}
             className={errors.appliedDate ? 'input-error' : ''}
+            aria-invalid={Boolean(errors.appliedDate)}
+            aria-describedby={errors.appliedDate ? 'appliedDate-error' : undefined}
           />
-          {errors.appliedDate && <p className="error-message">{errors.appliedDate}</p>}
+          {errors.appliedDate && (
+            <p id="appliedDate-error" className="error-message" role="alert">
+              {errors.appliedDate}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="form-field">
-        <label htmlFor="jobLink">Job Link *</label>
+      <div className={`form-field full-width ${errors.jobLink ? 'has-error' : ''}`}>
+        <label htmlFor="jobLink">Job Posting Link *</label>
         <input
           id="jobLink"
           name="jobLink"
-          type="text" /* Changed from type="url" to prevent browser native tooltip intercepts */
+          type="text"
           value={formData.jobLink}
           onChange={handleChange}
-          placeholder="https://company.com/careers/job-id"
+          onBlur={handleBlur}
+          placeholder="https://company.com/careers/frontend-role"
           className={errors.jobLink ? 'input-error' : ''}
+          aria-invalid={Boolean(errors.jobLink)}
+          aria-describedby={errors.jobLink ? 'jobLink-error' : undefined}
         />
-        {errors.jobLink && <p className="error-message">{errors.jobLink}</p>}
+        {errors.jobLink && (
+          <p id="jobLink-error" className="error-message" role="alert">
+            {errors.jobLink}
+          </p>
+        )}
       </div>
 
       <div className="form-actions">
@@ -142,7 +197,7 @@ function ApplicationForm({ onAddApplication }) {
           Add Application
         </button>
         <button type="button" className="cancel-button" onClick={handleReset}>
-          Cancel
+          Reset / Cancel
         </button>
       </div>
     </form>

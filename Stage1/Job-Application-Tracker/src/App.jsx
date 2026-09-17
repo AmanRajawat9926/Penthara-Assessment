@@ -12,7 +12,8 @@ function App() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return [];
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -22,8 +23,13 @@ function App() {
   const [selectedRound, setSelectedRound] = useState('All');
   const [editingId, setEditingId] = useState(null);
 
+  // Sync with localStorage on every change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e);
+    }
   }, [applications]);
 
   const handleAddApplication = (newApp) => {
@@ -42,51 +48,81 @@ function App() {
     if (editingId === id) setEditingId(null);
   };
 
-  // Filter and sort: newest appliedDate first. Tiebreak by array index/id.
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedRound('All');
+  };
+
+  // Filter first, then apply deterministic sorting
   const filteredAndSortedApplications = useMemo(() => {
-    return [...applications]
-      .sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate))
+    const query = searchQuery.trim().toLowerCase();
+
+    return applications
       .filter((app) => {
-        const matchesRound = selectedRound === 'All' || app.round === selectedRound;
-        const query = searchQuery.trim().toLowerCase();
+        const matchesRound =
+          selectedRound === 'All' || app.round === selectedRound;
         const matchesSearch =
           !query ||
           app.company.toLowerCase().includes(query) ||
           app.role.toLowerCase().includes(query);
 
         return matchesRound && matchesSearch;
+      })
+      .sort((a, b) => {
+        // Primary: newest appliedDate first (descending)
+        const dateDiff = b.appliedDate.localeCompare(a.appliedDate);
+        if (dateDiff !== 0) return dateDiff;
+
+        // Secondary tiebreaker: creation timestamp or fallback ID
+        const timeA = a.createdAt || 0;
+        const timeB = b.createdAt || 0;
+        if (timeA !== timeB) return timeB - timeA;
+
+        return String(b.id).localeCompare(String(a.id));
       });
   }, [applications, searchQuery, selectedRound]);
 
   return (
-    <main className="app-container">
+    <div className="app-layout">
       <header className="app-header">
-        <h1>Job Application Tracker</h1>
-        <p>Track your applications and keep tabs on stale rounds.</p>
+        <div className="header-content">
+          <h1>Job Application Tracker</h1>
+          <p className="subtitle">
+            Track your pipeline stages, inspect stale applications, and stay organized.
+          </p>
+        </div>
         <HeaderStats applications={applications} />
       </header>
 
-      <ApplicationForm onAddApplication={handleAddApplication} />
+      <main className="app-main">
+        <ApplicationForm onAddApplication={handleAddApplication} />
 
-      <section className="list-wrapper">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedRound={selectedRound}
-          onRoundChange={setSelectedRound}
-        />
+        <section className="pipeline-section">
+          <FilterBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedRound={selectedRound}
+            onRoundChange={setSelectedRound}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                handleClearFilters();
+              }
+            }}
+          />
 
-        <ApplicationList
-          totalCount={applications.length}
-          filteredApplications={filteredAndSortedApplications}
-          editingId={editingId}
-          onStartEdit={setEditingId}
-          onCancelEdit={() => setEditingId(null)}
-          onSaveEdit={handleSaveEdit}
-          onDelete={handleDeleteApplication}
-        />
-      </section>
-    </main>
+          <ApplicationList
+            totalCount={applications.length}
+            filteredApplications={filteredAndSortedApplications}
+            editingId={editingId}
+            onStartEdit={setEditingId}
+            onCancelEdit={() => setEditingId(null)}
+            onSaveEdit={handleSaveEdit}
+            onDelete={handleDeleteApplication}
+            onClearFilters={handleClearFilters}
+          />
+        </section>
+      </main>
+    </div>
   );
 }
 

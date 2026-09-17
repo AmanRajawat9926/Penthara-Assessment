@@ -5,16 +5,22 @@ function ApplicationItem({ application, onEdit, onDelete }) {
   const isStale = isApplicationStale(application);
 
   return (
-    <article className={`application-item ${isStale ? 'stale-border' : ''}`}>
+    <article
+      className={`application-item ${isStale ? 'is-stale' : ''}`}
+      data-testid="application-row"
+    >
       <div className="application-details">
         <div className="title-row">
-          <h3>{application.company}</h3>
+          <h3 className="company-title">{application.company}</h3>
           <span className={`round-badge badge-${application.round.toLowerCase()}`}>
             {application.round}
           </span>
           {isStale && (
-            <span className="stale-badge" title="No movement in >14 days while in Applied or Screen">
-              Stale
+            <span
+              className="stale-badge"
+              title="Application has been in Applied/Screen for more than 14 days"
+            >
+              ⚠ Stale (&gt;14d)
             </span>
           )}
         </div>
@@ -22,7 +28,7 @@ function ApplicationItem({ application, onEdit, onDelete }) {
         <p className="role-text">{application.role}</p>
 
         <div className="meta-row">
-          <span>
+          <span className="meta-applied">
             <strong>Applied:</strong> {application.appliedDate}
           </span>
           <span className="days-ago">
@@ -34,8 +40,9 @@ function ApplicationItem({ application, onEdit, onDelete }) {
             target="_blank"
             rel="noopener noreferrer"
             className="job-link"
+            title="Open job link in new tab"
           >
-            View Job Posting ↗
+            Job Link ↗
           </a>
         </div>
       </div>
@@ -45,6 +52,7 @@ function ApplicationItem({ application, onEdit, onDelete }) {
           type="button"
           className="edit-button"
           onClick={() => onEdit(application.id)}
+          aria-label={`Edit application for ${application.company}`}
         >
           Edit
         </button>
@@ -52,6 +60,7 @@ function ApplicationItem({ application, onEdit, onDelete }) {
           type="button"
           className="delete-button"
           onClick={() => onDelete(application.id)}
+          aria-label={`Delete application for ${application.company}`}
         >
           Delete
         </button>

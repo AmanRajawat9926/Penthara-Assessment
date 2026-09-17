@@ -8,37 +8,47 @@ function ApplicationList({
   onStartEdit,
   onCancelEdit,
   onSaveEdit,
-  onDelete
+  onDelete,
+  onClearFilters
 }) {
-  // Empty State 1: No applications saved in the system at all
+  // Empty State 1: No records in the entire database/localStorage
   if (totalCount === 0) {
     return (
-      <section className="application-list empty-state">
-        <h2>Applications (0)</h2>
-        <div className="empty-message">
-          <p className="empty-title">No applications added yet</p>
-          <p className="empty-desc">Use the form above to add your first job application.</p>
+      <section className="application-list empty-state" aria-label="Applications list empty">
+        <div className="empty-message-box">
+         
+          <h3 className="empty-title">No applications added yet</h3>
+          <p className="empty-desc">
+            Your tracker is empty. Use the form above to add your first job application and track your status.
+          </p>
         </div>
       </section>
     );
   }
 
-  // Empty State 2: Applications exist, but none match current search / filter
+  // Empty State 2: Applications exist, but current search / filter query has 0 matches
   if (filteredApplications.length === 0) {
     return (
-      <section className="application-list empty-state">
-        <h2>Applications (0)</h2>
-        <div className="empty-message">
-          <p className="empty-title">No matching applications</p>
-          <p className="empty-desc">Try clearing or adjusting your search criteria and round filter.</p>
+      <section className="application-list empty-state" aria-label="No search matches">
+        <div className="empty-message-box filter-empty">
+          <div className="empty-icon">🔍</div>
+          <h3 className="empty-title">No matching applications</h3>
+          <p className="empty-desc">
+            No applications match your active search and round filters.
+          </p>
+          <button type="button" className="clear-filter-btn" onClick={onClearFilters}>
+            Reset Filters
+          </button>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="application-list">
-      <h2>Applications ({filteredApplications.length})</h2>
+    <section className="application-list" aria-label="Applications list">
+      <div className="list-header">
+        <h2>Applications ({filteredApplications.length})</h2>
+      </div>
       <div className="application-items">
         {filteredApplications.map((application) =>
           editingId === application.id ? (
