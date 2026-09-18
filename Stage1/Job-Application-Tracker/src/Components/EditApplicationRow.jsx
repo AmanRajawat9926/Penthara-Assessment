@@ -16,7 +16,6 @@ function EditApplicationRow({ application, onSave, onCancel }) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Instant validation update
     const fieldError = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
@@ -56,8 +55,9 @@ function EditApplicationRow({ application, onSave, onCancel }) {
     >
       <div className="edit-grid">
         <div className={`form-field ${errors.company ? 'has-error' : ''}`}>
-          <label>Company *</label>
+          <label htmlFor={`edit-company-${application.id}`}>Company *</label>
           <input
+            id={`edit-company-${application.id}`}
             name="company"
             type="text"
             value={formData.company}
@@ -65,24 +65,30 @@ function EditApplicationRow({ application, onSave, onCancel }) {
             autoFocus
             className={errors.company ? 'input-error' : ''}
           />
-          {errors.company && <p className="error-message">{errors.company}</p>}
+          {errors.company && <p className="error-message" role="alert">{errors.company}</p>}
         </div>
 
         <div className={`form-field ${errors.role ? 'has-error' : ''}`}>
-          <label>Role *</label>
+          <label htmlFor={`edit-role-${application.id}`}>Role *</label>
           <input
+            id={`edit-role-${application.id}`}
             name="role"
             type="text"
             value={formData.role}
             onChange={handleChange}
             className={errors.role ? 'input-error' : ''}
           />
-          {errors.role && <p className="error-message">{errors.role}</p>}
+          {errors.role && <p className="error-message" role="alert">{errors.role}</p>}
         </div>
 
         <div className="form-field">
-          <label>Round</label>
-          <select name="round" value={formData.round} onChange={handleChange}>
+          <label htmlFor={`edit-round-${application.id}`}>Round</label>
+          <select
+            id={`edit-round-${application.id}`}
+            name="round"
+            value={formData.round}
+            onChange={handleChange}
+          >
             {ROUNDS.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -92,8 +98,9 @@ function EditApplicationRow({ application, onSave, onCancel }) {
         </div>
 
         <div className={`form-field ${errors.appliedDate ? 'has-error' : ''}`}>
-          <label>Applied Date *</label>
+          <label htmlFor={`edit-appliedDate-${application.id}`}>Applied Date *</label>
           <input
+            id={`edit-appliedDate-${application.id}`}
             type="date"
             name="appliedDate"
             max={getTodayString()}
@@ -101,19 +108,20 @@ function EditApplicationRow({ application, onSave, onCancel }) {
             onChange={handleChange}
             className={errors.appliedDate ? 'input-error' : ''}
           />
-          {errors.appliedDate && <p className="error-message">{errors.appliedDate}</p>}
+          {errors.appliedDate && <p className="error-message" role="alert">{errors.appliedDate}</p>}
         </div>
 
         <div className={`form-field full-width ${errors.jobLink ? 'has-error' : ''}`}>
-          <label>Job Link *</label>
+          <label htmlFor={`edit-jobLink-${application.id}`}>Job Link *</label>
           <input
+            id={`edit-jobLink-${application.id}`}
             type="text"
             name="jobLink"
             value={formData.jobLink}
             onChange={handleChange}
             className={errors.jobLink ? 'input-error' : ''}
           />
-          {errors.jobLink && <p className="error-message">{errors.jobLink}</p>}
+          {errors.jobLink && <p className="error-message" role="alert">{errors.jobLink}</p>}
         </div>
       </div>
 

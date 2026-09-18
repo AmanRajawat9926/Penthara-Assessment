@@ -18,7 +18,6 @@ function ApplicationForm({ onAddApplication }) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Instant validation if user has touched field or already has error
     if (touched[name] || errors[name]) {
       const errorMsg = validateField(name, value);
       setErrors((prev) => ({ ...prev, [name]: errorMsg }));
@@ -41,7 +40,6 @@ function ApplicationForm({ onAddApplication }) {
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
 
-    // Mark all as touched to trigger full visual state
     setTouched({
       company: true,
       role: true,

@@ -7,7 +7,7 @@ export const ROUNDS = [
 ];
 
 /**
- * Formats a Date object or today's date to YYYY-MM-DD in local time.
+ * Returns YYYY-MM-DD string for today in local system time.
  */
 export const getTodayString = () => {
   const today = new Date();
@@ -19,7 +19,6 @@ export const getTodayString = () => {
 
 /**
  * Calculates days elapsed between an applied date (YYYY-MM-DD) and today.
- * Uses UTC dates to avoid timezone/daylight savings shifts.
  */
 export const calculateDaysSinceApplied = (appliedDateString) => {
   if (!appliedDateString) return 0;
@@ -47,13 +46,13 @@ export const isApplicationStale = (application) => {
 };
 
 /**
- * Validates URLs strictly: requires http/https, clean parse, and a valid host with a TLD dot.
- * Rejects plain words (e.g., 'company', 'http://invalid').
+ * Validates URLs strictly: requires http/https, clean parse, valid hostname with TLD.
  */
 export const isValidUrl = (value) => {
   if (!value || typeof value !== 'string') return false;
+  const trimmed = value.trim();
   try {
-    const url = new URL(value.trim());
+    const url = new URL(trimmed);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
     return url.hostname.includes('.') && url.hostname.length > 3;
   } catch {
@@ -62,7 +61,17 @@ export const isValidUrl = (value) => {
 };
 
 /**
- * Single-field validation logic. Returns an error string or empty string.
+ * Ensures job link is a properly formatted URL with protocol for anchor href.
+ */
+export const formatUrl = (url) => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
+/**
+ * Single-field validation logic with accurate error messages.
  */
 export const validateField = (name, value) => {
   const strVal = typeof value === 'string' ? value.trim() : '';
@@ -71,11 +80,9 @@ export const validateField = (name, value) => {
   switch (name) {
     case 'company':
       if (!strVal) return 'Company name is required.';
-      if (strVal.length < 2) return 'Company name must be at least 2 characters.';
       return '';
     case 'role':
       if (!strVal) return 'Job role is required.';
-      if (strVal.length < 2) return 'Role must be at least 2 characters.';
       return '';
     case 'appliedDate':
       if (!value) return 'Applied date is required.';
@@ -84,7 +91,7 @@ export const validateField = (name, value) => {
     case 'jobLink':
       if (!strVal) return 'Job posting link is required.';
       if (!isValidUrl(strVal)) {
-        return 'Please enter a valid URL starting with http:// or https:// (e.g. https://careers.job.com/456).';
+        return 'Please enter a valid URL (e.g. https://careers.company.com/job).';
       }
       return '';
     default:
@@ -93,7 +100,7 @@ export const validateField = (name, value) => {
 };
 
 /**
- * Full form validator. Returns a map of field name -> error message.
+ * Full form validator. Returns key-value object of errors.
  */
 export const validateApplication = (formData) => {
   const fields = ['company', 'role', 'appliedDate', 'jobLink'];

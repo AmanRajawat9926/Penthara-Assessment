@@ -1,8 +1,9 @@
-import { calculateDaysSinceApplied, isApplicationStale } from '../Utils/helpers';
+import { calculateDaysSinceApplied, isApplicationStale, formatUrl } from '../Utils/helpers';
 
 function ApplicationItem({ application, onEdit, onDelete }) {
   const daysSince = calculateDaysSinceApplied(application.appliedDate);
   const isStale = isApplicationStale(application);
+  const hrefUrl = formatUrl(application.jobLink);
 
   return (
     <article
@@ -36,7 +37,7 @@ function ApplicationItem({ application, onEdit, onDelete }) {
           </span>
           <span className="meta-separator">•</span>
           <a
-            href={application.jobLink}
+            href={hrefUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="job-link"
